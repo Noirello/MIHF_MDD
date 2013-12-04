@@ -7,11 +7,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+/**
+ * CSV fájl feldolgozó.
+ */
 public class CSVParser implements Iterable<String[]>{
 	
 	private FileReader file;
 	private BufferedReader reader;
 
+	/**
+	 * Konstruktor.
+	 * @param path - fájl elérési útja.
+	 */
 	CSVParser(String path) {
 		try {
 			file = new FileReader(path);
@@ -21,17 +28,20 @@ public class CSVParser implements Iterable<String[]>{
 		}
 	}
 	
+	/**
+	 * Streamek lezárása.
+	 * @throws IOException
+	 */
 	public void close() throws IOException {
+		reader.close();
 		file.close();
 	}
 	
+	/**
+	 * Iterátor a sorok beolvasásához.
+	 */
 	@Override
 	public Iterator<String[]> iterator() {
-		try {
-			reader.ready();
-		} catch (IOException ex) {
-			reader = new BufferedReader(file);
-		}
 		Iterator<String[]> it = new Iterator<String[]>() {
 			private String currentLine = null;
 			private String[] values = null;
@@ -41,10 +51,10 @@ public class CSVParser implements Iterable<String[]>{
             	try {
 					currentLine = reader.readLine();
 					if (currentLine == null) {
-						reader.close();
 						return false;
 	            	}
     	        	values = currentLine.split(";");
+    	        	/* Ha nem sikerült feldarabolni a ';' mentén, akkor valószínûleg hibás a fájl. */
     	        	if (values.length <= 1) {
     	        		return false;
     	        	}
