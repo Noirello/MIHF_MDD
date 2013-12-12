@@ -34,10 +34,15 @@ public class MainWindow extends JFrame {
 		JButton draw = new JButton("Draw!");
 		final JLabel all_msg_num = new JLabel("Number of received msg: ");
 		final JLabel missin_msg_num = new JLabel("Number of missing msg: ");
+		final JLabel avg_l = new JLabel("Avg light value: ");
+		final JLabel avg_t = new JLabel("Avg temperature: ");
+		final JLabel min_t = new JLabel("Min temperature: ");
+		final JLabel max_t = new JLabel("Max temperature: ");
+		
 		final JComboBox<String> box = new JComboBox<>();
 		String[] series_labels = {"Temperature", "Light"};
 		final JComboBox<String> series = new JComboBox<>(series_labels);
-		btn.setSize(100, 20);
+		
 		btn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent ae) {
@@ -75,7 +80,10 @@ public class MainWindow extends JFrame {
 						selected_sensor = detector.initSensor((String)box.getSelectedItem());
 						all_msg_num.setText("Number of received msg: " + selected_sensor.getNumberOfReceivedMsg());
 						missin_msg_num.setText("Number of missing msg: " + selected_sensor.getNumberOfMissingMsg());
-						System.out.println(selected_sensor.getAvarageTemp());
+						avg_l.setText("Avg light value: " + selected_sensor.getAvarageLight());
+						avg_t.setText("Avg temperature: " + selected_sensor.getAvarageTemp()/8);
+						max_t.setText("Max temperature: " + (float)selected_sensor.getMaxTemp()/8);
+						min_t.setText("Min temperature: " + (float)selected_sensor.getMinTemp()/8);
 					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -89,21 +97,15 @@ public class MainWindow extends JFrame {
 			public void actionPerformed(ActionEvent ae) {
 				String id = (String)box.getSelectedItem();
 				if (id != null) {
-					/* Idõsor beállítása a diagramon. */
-					diag.setTimeLine(selected_sensor.getTimeline());
-					/* Hõmérséklet vagy fényerõ rajzolása? */
+					diag.setSensor(selected_sensor);
 					switch (series.getSelectedIndex()) {
-						case 0:
-							diag.setTemperature(selected_sensor.getTemperatures());
-							diag.setFigure(0);
-							break;
-						case 1:
-							diag.setLight(selected_sensor.getLights());
-							diag.setFigure(1);
-							break;
+					case 0:
+						diag.setData("Temperature", "Celsius", diag.getTemperatureData());
+						break;
+					case 1:
+						diag.setData("Light", "Lux", diag.getLightData());
+						break;
 					}
-					/* Hiányzó adatok beállítása a diagramon. */
-					diag.setMissingValues(selected_sensor.generateMissingMsgs());
 					diag.repaint();
 				}
 			}
@@ -118,16 +120,23 @@ public class MainWindow extends JFrame {
 			    .addGroup(layout.createSequentialGroup()
 			    		.addComponent(all_msg_num, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 			    		.addComponent(missin_msg_num, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+			    .addGroup(layout.createSequentialGroup()
+			    		.addComponent(avg_l, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+			    		.addComponent(avg_t, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+			    		.addComponent(max_t, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+			    		.addComponent(min_t, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 			        .addComponent(diag, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE));
 		layout.setVerticalGroup(layout.createSequentialGroup()
 			    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 			        .addComponent(btn).addComponent(box).addComponent(series).addComponent(draw))
 			    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 			    	.addComponent(all_msg_num).addComponent(missin_msg_num))
+			    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+			    	.addComponent(avg_l).addComponent(avg_t).addComponent(max_t).addComponent(min_t))
 			    .addComponent(diag));
 		add(panel);
 		setTitle("BME - MIHF - MDD");
-		setSize(600, 600);
+		setSize(650, 600);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 	}

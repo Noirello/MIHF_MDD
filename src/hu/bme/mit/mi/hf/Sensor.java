@@ -44,6 +44,7 @@ public class Sensor {
 			/* Szenszor tartós kimaradás. */
 			if (msg.getTime() - last_one.getTime() >= 600000) {
 				loss.add(last_one.getTime());
+				loss.add(msg.getTime());
 			}
 			/* Üzenet vesztés. */
 			if ((msg.getNumber() - last_one.getNumber()) > 1) {
@@ -104,7 +105,6 @@ public class Sensor {
 		for (int i = 0; i < missing_points.size() - 1; i+=2) {
 			missing_msgs.addAll(this.linearInterpolation(missing_points.get(i), missing_points.get(i+1)));
 		}
-		System.out.println(missing_msgs.size());
 		return missing_msgs;
 	}
 	
@@ -148,28 +148,8 @@ public class Sensor {
 		return loss;
 	}
 	
-	public ArrayList<Long> getTimeline() {
-		ArrayList<Long> timeline = new ArrayList<>();
-		for (int i = 0; i < msgs.size(); i++) {
-			timeline.add(msgs.get(i).getTime());
-		}
-		return timeline;
-	}
-	
-	public ArrayList<Integer> getTemperatures() {
-		ArrayList<Integer> temps = new ArrayList<>();
-		for (int i = 0; i < msgs.size(); i++) {
-			temps.add(msgs.get(i).getTemperature());
-		}
-		return temps;
-	}
-	
-	public ArrayList<Integer> getLights() {
-		ArrayList<Integer> lights = new ArrayList<>();
-		for (int i = 0; i < msgs.size(); i++) {
-			lights.add(msgs.get(i).getLight());
-		}
-		return lights;
+	public ArrayList<SensorMsg> getMessages() {
+		return msgs;
 	}
 	
 	public float getAvarageTemp() {
