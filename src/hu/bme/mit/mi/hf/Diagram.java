@@ -29,7 +29,6 @@ public class Diagram extends JPanel {
 	
 	private ChartPanel chart_panel = new ChartPanel(null);
 	private Sensor sensor = null;
-	private ArrayList<Long> sysdown;
 	
 	public Diagram() {
 		add(chart_panel);
@@ -48,7 +47,7 @@ public class Diagram extends JPanel {
 	 * @param data Lista az idõpontokkal.
 	 * @param value A hozzáadott érték.
 	 */
-	public TimeSeries setSysDown(ArrayList<Long> data, float value) {
+	public TimeSeries getSysDown(ArrayList<Long> data, float value) {
 		TimeSeries ts_sys = new TimeSeries("SysDownTime");
 		for(Long time : data) {
 			ts_sys.addOrUpdate(new Millisecond(new Date(time)), value);

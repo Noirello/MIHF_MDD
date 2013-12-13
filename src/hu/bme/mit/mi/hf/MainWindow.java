@@ -104,13 +104,15 @@ public class MainWindow extends JFrame {
 					diag.setSensor(selected_sensor);
 					switch (series.getSelectedIndex()) {
 					case 0:
+						// Ha a hõmérséklet van kiválasztva.
 						tsc = diag.getTemperatureData();
-						tsc.addSeries(diag.setSysDown(sysdown, selected_sensor.getAvarageTemp()));
+						tsc.addSeries(diag.getSysDown(sysdown, selected_sensor.getAvarageTemp()));
 						diag.setData("Temperature", "Celsius", tsc);
 						break;
 					case 1:
+						// Ha a fényerõsség van kiválasztva.
 						tsc = diag.getLightData();
-						tsc.addSeries(diag.setSysDown(sysdown, selected_sensor.getAvarageLight()));
+						tsc.addSeries(diag.getSysDown(sysdown, selected_sensor.getAvarageLight()));
 						diag.setData("Light", "Lux", diag.getLightData());
 						break;
 					}
