@@ -24,11 +24,11 @@ import org.jfree.data.time.TimeSeriesCollection;
  */
 public class Diagram extends JPanel {
 	private static final Shape circle = new Ellipse2D.Double(-1, -1, 2, 2);
-	private static final Shape big_circle = new Ellipse2D.Double(-2, -2, 4, 4);
 	private static final long serialVersionUID = 1L;
 	
 	private ChartPanel chart_panel = new ChartPanel(null);
 	private Sensor sensor = null;
+	private ArrayList<Long> sysdown;
 	
 	public Diagram() {
 		add(chart_panel);
@@ -43,16 +43,11 @@ public class Diagram extends JPanel {
 	}
 	
 	/**
-	 * A hosszabb idejû rendszerkimaradás idõpontjainak beállítása.
+	 * A hosszabidejû rendszerkimaradás idõpontjainak beállítása.
 	 * @param data Lista az idõpontokkal.
-	 * @param value A hozzáadott érték.
 	 */
-	public TimeSeries getSysDown(ArrayList<Long> data, float value) {
-		TimeSeries ts_sys = new TimeSeries("SysDownTime");
-		for(Long time : data) {
-			ts_sys.addOrUpdate(new Millisecond(new Date(time)), value);
-		}
-		return ts_sys;
+	public void setSysDown(ArrayList<Long> data) {
+		sysdown = data;
 	}
 	
 	/**
@@ -113,7 +108,6 @@ public class Diagram extends JPanel {
             @Override
             public Paint getItemPaint(int row, int column) {
             	Paint col;
-            	if (row == 2) return Color.black;
             	if (row == 0) {
             		col = Color.pink;
             	} else {
@@ -121,6 +115,12 @@ public class Diagram extends JPanel {
             	}
             	
                 long x = (long)tsc.getXValue(row, column);
+                // Ha az adott idõpont egy tartós rendszerkimaradás intervallumába esik, akkor a jelölõ pont fekete lesz. 
+            	for (int i = 0; i < (sysdown.size() - 1); i += 2) {
+            		if ((x >= sysdown.get(i)) && (x <= sysdown.get(i+1))) {
+            			return Color.black;
+            		}
+            	}
                 // Ha az adott idõpont beleesik a szenzor tartós kimaradása intervallumba a jelõlõ pont szine lecserélõdik.
             	for (int i = 0; i < (sensor.getHeavyLoss().size() - 1); i += 2) {
             		if ((x > sensor.getHeavyLoss().get(i)) && (x < sensor.getHeavyLoss().get(i+1))) {
@@ -131,14 +131,12 @@ public class Diagram extends JPanel {
             }
             @Override
             public boolean getItemLineVisible(int series, int item) {
-            	// Összekötõ vonal csak a mért értékek között.
-            	if (series == 1) return true;
-            	else return false;
+            	if (series == 0) return false;
+            	else return true;
             }
         };
         renderer.setSeriesShape(0, circle);
         renderer.setSeriesShape(1, circle);
-        renderer.setSeriesShape(2, big_circle);
         renderer.getBaseLinesVisible();
         renderer.setBaseStroke(new BasicStroke(1));
         plot.setRenderer(renderer);

@@ -3,7 +3,6 @@ package hu.bme.mit.mi.hf;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Set;
 
 import javax.swing.DefaultComboBoxModel;
@@ -16,8 +15,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import org.jfree.data.time.TimeSeriesCollection;
-
 /**
  * Az alkalmazás fõablaka.
  */
@@ -25,7 +22,6 @@ public class MainWindow extends JFrame {
 	
 	private JFileChooser fileChooser = new JFileChooser();
 	private Sensor selected_sensor = null;
-	private ArrayList<Long> sysdown = null;
 	private static final long serialVersionUID = -7018142967304183953L;
 	
 	public MainWindow() {
@@ -62,7 +58,7 @@ public class MainWindow extends JFrame {
 								model.addElement(id);
 							}
 							box.setModel(model);
-							sysdown = detector.getSystemDownTime();
+							diag.setSysDown(detector.getSystemDownTime());
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
@@ -99,20 +95,13 @@ public class MainWindow extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent ae) {
 				String id = (String)box.getSelectedItem();
-				TimeSeriesCollection tsc;
 				if (id != null) {
 					diag.setSensor(selected_sensor);
 					switch (series.getSelectedIndex()) {
 					case 0:
-						// Ha a hõmérséklet van kiválasztva.
-						tsc = diag.getTemperatureData();
-						tsc.addSeries(diag.getSysDown(sysdown, selected_sensor.getAvarageTemp()));
-						diag.setData("Temperature", "Celsius", tsc);
+						diag.setData("Temperature", "Celsius", diag.getTemperatureData());
 						break;
 					case 1:
-						// Ha a fényerõsség van kiválasztva.
-						tsc = diag.getLightData();
-						tsc.addSeries(diag.getSysDown(sysdown, selected_sensor.getAvarageLight()));
 						diag.setData("Light", "Lux", diag.getLightData());
 						break;
 					}
