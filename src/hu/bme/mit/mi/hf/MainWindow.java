@@ -3,6 +3,7 @@ package hu.bme.mit.mi.hf;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Set;
 
 import javax.swing.DefaultComboBoxModel;
@@ -15,6 +16,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import org.jfree.data.time.TimeSeriesCollection;
+
 /**
  * Az alkalmazás fõablaka.
  */
@@ -22,6 +25,7 @@ public class MainWindow extends JFrame {
 	
 	private JFileChooser fileChooser = new JFileChooser();
 	private Sensor selected_sensor = null;
+	private ArrayList<Long> sysdown = null;
 	private static final long serialVersionUID = -7018142967304183953L;
 	
 	public MainWindow() {
@@ -58,8 +62,8 @@ public class MainWindow extends JFrame {
 								model.addElement(id);
 							}
 							box.setModel(model);
+							sysdown = detector.getSystemDownTime();
 						} catch (IOException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 						break;
@@ -86,7 +90,6 @@ public class MainWindow extends JFrame {
 						min_t.setText("Min temperature: " + (float)selected_sensor.getMinTemp()/8);
 					}
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -96,13 +99,18 @@ public class MainWindow extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent ae) {
 				String id = (String)box.getSelectedItem();
+				TimeSeriesCollection tsc;
 				if (id != null) {
 					diag.setSensor(selected_sensor);
 					switch (series.getSelectedIndex()) {
 					case 0:
-						diag.setData("Temperature", "Celsius", diag.getTemperatureData());
+						tsc = diag.getTemperatureData();
+						tsc.addSeries(diag.setSysDown(sysdown, selected_sensor.getAvarageTemp()));
+						diag.setData("Temperature", "Celsius", tsc);
 						break;
 					case 1:
+						tsc = diag.getLightData();
+						tsc.addSeries(diag.setSysDown(sysdown, selected_sensor.getAvarageLight()));
 						diag.setData("Light", "Lux", diag.getLightData());
 						break;
 					}

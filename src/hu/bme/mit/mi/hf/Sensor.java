@@ -42,15 +42,16 @@ public class Sensor {
 		if (msgs.size() != 0) {
 			last_one = msgs.get(msgs.size()-1);
 			/* Szenszor tartós kimaradás. */
-			if (msg.getTime() - last_one.getTime() >= 600000) {
+			if (msg.getTime() - last_one.getTime() >= 900000) {
 				loss.add(last_one.getTime());
 				loss.add(msg.getTime());
 			}
 			/* Üzenet vesztés. */
-			if ((msg.getNumber() - last_one.getNumber()) > 1) {
+			int missed = (msg.getNumber() - last_one.getNumber());
+			if (missed > 1 && missed < 10000) {
 				missing_points.add(last_one);
 				missing_points.add(msg);
-				missing_msg += (msg.getNumber() - last_one.getNumber() - 1);
+				missing_msg += (missed - 1);
 			}
 		}
 		if (msg.getTemperature() > max_temp) {

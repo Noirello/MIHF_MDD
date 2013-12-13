@@ -49,7 +49,10 @@ public class Detector {
 		Sensor sensor = new Sensor(id);
 		for (String[] line : csv) {
 			if (line[2].equals(id)) {
-				sensor.addNewMsg(new SensorMsg(line));
+				SensorMsg msg = new SensorMsg(line);
+				// Hibás adatok szûrése.
+				if ((msg.getTemperature() > 1600) || (msg.getLight() > 1024)) continue;
+				sensor.addNewMsg(msg);
 			}
 		}
 		csv.close();
@@ -58,7 +61,7 @@ public class Detector {
 	
 	/**
 	 * Azokat az idõpontokat keresi meg ahol két üzenet ideje között nagyobb a különbség,
-	 * mint 5 perc. 
+	 * mint 15 perc. 
 	 * @return Lista a kezdõ- és végidõpontokkal az 5 percnél nagyobb kimaradásról.
 	 * @throws IOException
 	 */
@@ -68,7 +71,7 @@ public class Detector {
 		long prev_date = Long.MAX_VALUE;
 		for (String[] line : csv) {
 			long curr_date = SensorMsg.dateToTimeStamp(line[0]);
-			if ((curr_date - prev_date) > 300000) {
+			if ((curr_date - prev_date) > 900000) {
 				data.add(prev_date);
 				data.add(curr_date);
 			}
