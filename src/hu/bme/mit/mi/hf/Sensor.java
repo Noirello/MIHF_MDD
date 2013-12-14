@@ -13,6 +13,7 @@ public class Sensor {
 	private int missing_msg;
 	private float avg_temp;
 	private float avg_light;
+	private float avg_time_diff;
 	private int max_temp;
 	private int min_temp;
 	
@@ -42,17 +43,19 @@ public class Sensor {
 		if (msgs.size() != 0) {
 			last_one = msgs.get(msgs.size()-1);
 			/* Szenszor tartós kimaradás. */
-			if (msg.getTime() - last_one.getTime() >= 900000) {
+			long time_diff = msg.getTime() - last_one.getTime();
+			if (time_diff >= 900000) {
 				loss.add(last_one.getTime());
 				loss.add(msg.getTime());
 			}
 			/* Üzenet vesztés. */
 			int missed = (msg.getNumber() - last_one.getNumber());
-			if (missed > 1 && missed < 10000) {
+			if ((missed > 1 && missed < 10000) || time_diff > 900000) {
 				missing_points.add(last_one);
 				missing_points.add(msg);
 				missing_msg += (missed - 1);
 			}
+			avg_time_diff =  avg_time_diff + (((float)time_diff - avg_time_diff)/(msgs.size() + 1));
 		}
 		if (msg.getTemperature() > max_temp) {
 			max_temp = msg.getTemperature(); 
@@ -84,16 +87,28 @@ public class Sensor {
 		int end_light = end.getLight(); 
 		long end_date = end.getTime();
 		
-		for (int x = start_num + 1; x < end_num; x++) {
-			/* Lineráis interpolláció képletet alapján */
-			long y_date = start_date + ((end_date - start_date) * (x - start_num)) / (end_num - start_num);
-			int y_temp = start_temp + ((end_temp - start_temp) * (x - start_num)) / (end_num - start_num);
-			int y_light = start_light + ((end_light - start_light) * (x - start_num)) / (end_num - start_num);
+		if ((start_num - end_num) > 1)	{
+			for (int x = start_num + 1; x < end_num; x++) {
+				/* Lineráis interpolláció képletet alapján */
+				long y_date = start_date + ((end_date - start_date) * (x - start_num)) / (end_num - start_num);
+				int y_temp = start_temp + ((end_temp - start_temp) * (x - start_num)) / (end_num - start_num);
+				int y_light = start_light + ((end_light - start_light) * (x - start_num)) / (end_num - start_num);
 			
-			if (y_light > 1024 || y_temp > 800) continue; 
+				if (y_light > 1024 || y_temp > 800) continue; 
 			
-			data.add(new SensorMsg(y_date, x, y_temp, y_light));
-		}
+				data.add(new SensorMsg(y_date, x, y_temp, y_light));
+			}
+		} else {
+			for (long y_date = (long) (start_date + avg_time_diff); y_date < end_date; y_date += avg_time_diff) {
+				/* Lineráis interpolláció képletet alapján */
+				int y_temp = (int) (start_temp + ((end_temp - start_temp) * (y_date - start_date)) / (end_date - start_date));
+				int y_light = (int) (start_light + ((end_light - start_light) * (y_date - start_date)) / (end_date - start_date));
+			
+				if (y_light > 1024 || y_temp > 800) continue; 
+			
+				data.add(new SensorMsg(y_date, start_num, y_temp, y_light));
+			}
+		}	
 		return data;
 	}
 	

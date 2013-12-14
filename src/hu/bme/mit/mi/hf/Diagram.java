@@ -137,7 +137,6 @@ public class Diagram extends JPanel {
         };
         renderer.setSeriesShape(0, circle);
         renderer.setSeriesShape(1, circle);
-        renderer.getBaseLinesVisible();
         renderer.setBaseStroke(new BasicStroke(1));
         plot.setRenderer(renderer);
 		chart_panel.setChart(chart);

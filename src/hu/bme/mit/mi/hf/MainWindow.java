@@ -23,6 +23,7 @@ public class MainWindow extends JFrame {
 	private JFileChooser fileChooser = new JFileChooser();
 	private Sensor selected_sensor = null;
 	private static final long serialVersionUID = -7018142967304183953L;
+	private Detector detector; 
 	
 	public MainWindow() {
 		JPanel panel = new JPanel();
@@ -48,7 +49,7 @@ public class MainWindow extends JFrame {
 			public void actionPerformed(ActionEvent ae) {
 				switch (fileChooser.showOpenDialog(MainWindow.this)) {
 					case JFileChooser.APPROVE_OPTION:
-						Detector detector = new Detector(fileChooser.getSelectedFile().toString());
+						detector = new Detector(fileChooser.getSelectedFile().toString());
 						try {
 							/* A logfájl kiválasztása után a küldõ ID-kal feltölti a legördülõ menüt.*/
 							Set<String> ids = detector.getSenderIds();
@@ -74,7 +75,6 @@ public class MainWindow extends JFrame {
 		box.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent ae) {
-				Detector detector = new Detector(fileChooser.getSelectedFile().toString());
 				try {
 					if (box.getSelectedIndex() != 0) {
 						selected_sensor = detector.initSensor((String)box.getSelectedItem());
